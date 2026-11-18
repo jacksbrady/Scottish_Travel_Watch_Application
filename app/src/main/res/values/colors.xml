@@ -2,4 +2,11 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="cat_road_closed">#6A1B9A</color>
+    <color name="cat_queuing">#1565C0</color>
+    <color name="cat_lane_restriction">#00838F</color>
+    <color name="cat_incident">#455A64</color>
+    <color name="cat_roadworks">#2E7D32</color>
+    <color name="cat_roadworks_delays">#EF6C00</color>
+    <color name="cat_roadworks_long_delays">#C62828</color>
 </resources>

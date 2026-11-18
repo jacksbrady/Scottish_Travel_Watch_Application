@@ -7,11 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * One traffic "situation" is a single object created
- * by TrafficParser from a <situationRecord> in the XML
- * and filled in as the parser reads the tags inside it
- */
 public class Situation {
 
     private static final DateTimeFormatter DISPLAY_FORMAT =

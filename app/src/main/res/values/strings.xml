@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">Scottish Traffic Updates</string>
+    <string name="filter_all">All</string>
+    <string name="filter_incidents">Incidents</string>
+    <string name="filter_roadworks">Roadworks</string>
+    <string name="nav_list">List</string>
+    <string name="nav_map">Map</string>
+    <string name="refresh">Refresh</string>
+    <string name="test_data">Test data files</string>
+    <string name="menu_all_data">All data (normal)</string>
+    <string name="menu_incidents_1">Incidents file 1</string>
+    <string name="menu_incidents_2">Incidents file 2</string>
+    <string name="menu_roadworks_1">Roadworks file 1</string>
+    <string name="menu_roadworks_2">Roadworks file 2</string>
+    <string name="no_situations">No situations to show</string>
+    <string name="attribution">Contains Traffic Scotland data</string>
 </resources>

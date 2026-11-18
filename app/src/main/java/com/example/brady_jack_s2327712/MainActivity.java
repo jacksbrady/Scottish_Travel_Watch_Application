@@ -7,36 +7,25 @@
 package com.example.brady_jack_s2327712;
 
 import android.os.Bundle;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.TextView;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.brady_jack_s2327712.model.Situation;
-import com.example.brady_jack_s2327712.model.SituationCategory;
+import com.example.brady_jack_s2327712.ui.SituationListFragment;
+import com.example.brady_jack_s2327712.ui.SituationMapFragment;
 import com.example.brady_jack_s2327712.viewmodel.TrafficViewModel;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+public class MainActivity extends AppCompatActivity {
 
-// Test to prove parsing successful
-public class MainActivity extends AppCompatActivity implements OnClickListener {
-
-    private TextView statusDisplay;
-    private TextView rawDataDisplay;
-    private Button refreshButton;
-    private Button incidents1Button;
-    private Button incidents2Button;
-    private Button roadworks1Button;
-    private Button roadworks2Button;
     private TrafficViewModel viewModel;
 
     @Override
@@ -47,76 +36,60 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+            return WindowInsetsCompat.CONSUMED;   // handled here, so children don't pad again
         });
 
-        statusDisplay = findViewById(R.id.salutation);
-        rawDataDisplay = findViewById(R.id.rawDataDisplay);
-        refreshButton = findViewById(R.id.startButton);
-        incidents1Button = findViewById(R.id.incidents1Button);
-        incidents2Button = findViewById(R.id.incidents2Button);
-        roadworks1Button = findViewById(R.id.roadworks1Button);
-        roadworks2Button = findViewById(R.id.roadworks2Button);
-
-        refreshButton.setOnClickListener(this);
-        incidents1Button.setOnClickListener(this);
-        incidents2Button.setOnClickListener(this);
-        roadworks1Button.setOnClickListener(this);
-        roadworks2Button.setOnClickListener(this);
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         viewModel = new ViewModelProvider(this).get(TrafficViewModel.class);
 
-        viewModel.getStatus().observe(this, status -> statusDisplay.setText(status));
-        viewModel.isLoading().observe(this, this::setButtonsEnabled);
-        viewModel.getSituations().observe(this, this::showPreview);
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_list) {
+                showFragment(new SituationListFragment());
+            } else if (id == R.id.nav_map) {
+                showFragment(new SituationMapFragment());
+            }
+            return true;   // true = show the item as selected
+        });
+
+        if (savedInstanceState == null) {
+            showFragment(new SituationListFragment());
+        }
+    }
+
+    /** Fragment transaction: put this fragment into the placeholder. */
+    private void showFragment(Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .commit();
     }
 
     @Override
-    public void onClick(View view) {
-        if (view == refreshButton) {
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_refresh || id == R.id.menu_all_data) {
             viewModel.refresh();
-        } else if (view == incidents1Button) {
+        } else if (id == R.id.menu_incidents_1) {
             viewModel.loadExampleFile(R.raw.unplanned_example, false, "unplanned_example.xml");
-        } else if (view == incidents2Button) {
+        } else if (id == R.id.menu_incidents_2) {
             viewModel.loadExampleFile(R.raw.unplanned_example_2, false, "unplanned_example_2.xml");
-        } else if (view == roadworks1Button) {
+        } else if (id == R.id.menu_roadworks_1) {
             viewModel.loadExampleFile(R.raw.roadworks_example, true, "roadworks_example.xml");
-        } else if (view == roadworks2Button) {
+        } else if (id == R.id.menu_roadworks_2) {
             viewModel.loadExampleFile(R.raw.roadworks_example_2, true, "roadworks_example_2.xml");
+        } else {
+            return super.onOptionsItemSelected(item);
         }
-    }
-
-    private void setButtonsEnabled(boolean loading) {
-        refreshButton.setEnabled(!loading);
-        incidents1Button.setEnabled(!loading);
-        incidents2Button.setEnabled(!loading);
-        roadworks1Button.setEnabled(!loading);
-        roadworks2Button.setEnabled(!loading);
-    }
-
-    private void showPreview(List<Situation> situations) {
-        Map<SituationCategory, Integer> counts = new EnumMap<>(SituationCategory.class);
-        int missingRoad = 0;
-        int missingPoints = 0;
-        for (Situation s : situations) {
-            counts.merge(s.getCategory(), 1, Integer::sum);
-            if (s.getRoadName() == null) missingRoad++;
-            if (s.getPoints().size() < 2) missingPoints++;
-        }
-
-        StringBuilder sb = new StringBuilder("By category:\n");
-        for (Map.Entry<SituationCategory, Integer> entry : counts.entrySet()) {
-            sb.append("   ").append(entry.getKey().getLabel())
-                    .append(": ").append(entry.getValue()).append('\n');
-        }
-        sb.append("Missing road name: ").append(missingRoad).append('\n');
-        sb.append("Missing from/to coordinates: ").append(missingPoints).append("\n\n");
-
-        int shown = Math.min(10, situations.size());
-        sb.append("First ").append(shown).append(" situations:\n\n");
-        for (int i = 0; i < shown; i++) {
-            sb.append(situations.get(i).toString()).append("\n\n");
-        }
-        rawDataDisplay.setText(sb.toString());
+        return true;
     }
 }
