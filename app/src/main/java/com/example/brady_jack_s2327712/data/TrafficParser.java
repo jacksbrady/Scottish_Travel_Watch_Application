@@ -106,12 +106,12 @@ public class TrafficParser {
                 } else if (tag.equalsIgnoreCase("tpegIlcPointDescriptorType")) {
                     String type = xpp.nextText().trim();
                     if (type.equals("tpegIlcName1") && current.getRoadName() == null) {
-                        current.setRoadName(lastDescriptorValue);
+                        current.setRoadName(Situation.findRoadInText(lastDescriptorValue));
                     }
                 } else if (tag.equalsIgnoreCase("tpegOtherPointDescriptorType")) {
                     String type = xpp.nextText().trim();
                     if (type.equals("linkName")) {
-                        if (current.getRoadName() == null) current.setRoadName(lastDescriptorValue);
+                        if (current.getRoadName() == null) current.setRoadName(Situation.findRoadInText(lastDescriptorValue));
                     } else if (currentPoint != null) {
                         currentPoint.setPlaceName(lastDescriptorValue);
                     }
