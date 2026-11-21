@@ -38,8 +38,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Screen 3 - Google Map
- * <p>
  * All situations are shown on the map with lines connecting their from and to points.
  * All situations are clickable to receive further details
  */

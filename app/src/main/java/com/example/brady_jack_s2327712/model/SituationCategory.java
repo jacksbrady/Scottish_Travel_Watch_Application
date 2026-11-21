@@ -6,7 +6,7 @@ import androidx.annotation.DrawableRes;
 import com.example.brady_jack_s2327712.R;
 
 /**
- * Categories the nature of situation with clear text, colour and icon identifiers for
+ * Categorises the nature of situation with clear text, colour and icon identifiers for
  * easy reusability
  * ----
  * AI proposed an enum instead of alternatives for its

@@ -72,4 +72,12 @@ public class SituationSearchTest {
         assertEquals("A78", Situation.findRoadInText("The A78 is closed, diversions in place."));
         assertNull(Situation.findRoadInText("Essential works at Brechin"));
     }
+
+    @Test
+    public void findRoadInText_keepsOnlyTheRoadNumber() {
+        assertEquals("M8", Situation.findRoadInText("M8MONKLANDS"));
+        assertEquals("A74(M)", Situation.findRoadInText("A74(M) J19 Eaglesfield"));
+        assertNull(Situation.findRoadInText("Off Network"));
+        assertNull(Situation.findRoadInText(null));
+    }
 }

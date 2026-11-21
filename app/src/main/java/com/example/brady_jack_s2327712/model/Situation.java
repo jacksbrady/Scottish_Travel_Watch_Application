@@ -139,6 +139,7 @@ public class Situation {
 
     // Finds first road name in a sentence to be added to the situations details
     public static String findRoadInText(String text) {
+        if (text == null) return null;
         String[] words = text.split(" ");
         for (String word : words) {
             // remove punctuation stuck to the word, e.g. "A78," -> "A78"
@@ -146,7 +147,7 @@ public class Situation {
             if (w.length() >= 2
                     && (w.startsWith("M") || w.startsWith("A") || w.startsWith("B"))
                     && Character.isDigit(w.charAt(1))) {
-                return w;
+                return w.replaceAll("^([MAB]\\d+(\\(M\\))?).*$", "$1");
             }
         }
         return null;   // no road name found

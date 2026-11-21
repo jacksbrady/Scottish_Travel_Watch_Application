@@ -26,7 +26,7 @@ import com.example.brady_jack_s2327712.BuildConfig;
 
 /**
  * Traffic Repository reads the data from either the example files or the
- * live data stream and passes it to TrafficParser to be paresd into the model
+ * live data stream and passes it to TrafficParser to be parsed into the model
  * <p>
  * Each successful download is saved to app storage so the previous data
  * can be used if the next download fails
@@ -45,7 +45,7 @@ public class TrafficRepository {
     private static final String ROADWORKS_URL =
             "https://datex2.trafficscotland.org/rest/2.3/publications/CurrentRoadworks/Content.xml";
 
-    // Dile names of saved copies of last good data in app's private storage if connection to live data is lost
+    // File names of saved copies of last good data in app's private storage if connection to live data is lost
     private static final String UNPLANNED_CACHE = "unplanned_cache.xml";
     private static final String ROADWORKS_CACHE = "roadworks_cache.xml";
     // Reads from local.properties on build so never written in java file
@@ -58,7 +58,7 @@ public class TrafficRepository {
         this.context = context.getApplicationContext();
     }
 
-    // A load produces three things (situations, where they came from, offline or not),
+    // A load produces two things (situations and where they came from),
     // but a method can only return one, so they are bundled together here
     public static class LoadResult {
         private final List<Situation> situations;

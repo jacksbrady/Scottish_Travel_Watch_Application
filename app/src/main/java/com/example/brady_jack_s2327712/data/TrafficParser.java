@@ -44,7 +44,7 @@ public class TrafficParser {
         XmlPullParser xpp = factory.newPullParser();
         xpp.setInput(new StringReader(xml));
 
-        // As the paser only knows the tag it's on, these values helps it to remember where it is
+        // As the parser only knows the tag it's on, these values help it to remember where it is
         ArrayList<Situation> situations = new ArrayList<>();
         Situation current = null;          // situation being filled in
         GeoPoint currentPoint = null;      // not null while inside <from> or <to>
