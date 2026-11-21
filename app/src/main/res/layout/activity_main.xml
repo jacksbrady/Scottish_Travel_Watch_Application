@@ -12,7 +12,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
-        android:background="?attr/colorPrimaryContainer"
+        android:background="@color/brand_navy"
+        android:theme="@style/ThemeOverlay.Material3.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.App.Popup"
+        app:titleTextColor="@color/white"
         app:title="@string/app_name" />
 
     <FrameLayout

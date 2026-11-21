@@ -7,6 +7,25 @@
     android:paddingStart="8dp"
     android:paddingEnd="8dp">
 
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:hint="@string/search_road_hint"
+        app:endIconMode="clear_text">
+
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            style="@style/Widget.Material3.AutoCompleteTextView.OutlinedBox"
+            android:id="@+id/roadSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:completionThreshold="1"
+            android:imeOptions="actionSearch"
+            android:inputType="textCapCharacters|textNoSuggestions"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
+
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/filterGroup"
         android:layout_width="match_parent"
@@ -36,12 +55,25 @@
             android:text="@string/filter_roadworks" />
     </com.google.android.material.chip.ChipGroup>
 
+    <com.google.android.material.chip.Chip
+        android:id="@+id/distanceChip"
+        style="@style/Widget.Material3.Chip.Assist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/distance_off" />
+
     <TextView
         android:id="@+id/statusText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="13sp"
         android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/resultCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12sp" />
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progress"

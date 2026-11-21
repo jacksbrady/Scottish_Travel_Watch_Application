@@ -27,13 +27,14 @@ public class TrafficParser {
     private static final String XSI_NAMESPACE = "http://www.w3.org/2001/XMLSchema-instance";
 
     /**
-     * @param xml            the downloaded XML text
-     * @param roadworksFeed  true for the roadworks feed, false for unplanned events
+     * @param xml           the downloaded XML text
+     * @param roadworksFeed true for the roadworks feed, false for unplanned events
      */
     public ArrayList<Situation> parse(String xml, boolean roadworksFeed)
             throws XmlPullParserException, IOException {
 
         // Skip anything before the first tag
+        // Error reported if there is no XML
         int start = xml.indexOf('<');
         if (start < 0) throw new XmlPullParserException("No XML found in the data");
         xml = xml.substring(start);
@@ -43,6 +44,7 @@ public class TrafficParser {
         XmlPullParser xpp = factory.newPullParser();
         xpp.setInput(new StringReader(xml));
 
+        // As the paser only knows the tag it's on, these values helps it to remember where it is
         ArrayList<Situation> situations = new ArrayList<>();
         Situation current = null;          // situation being filled in
         GeoPoint currentPoint = null;      // not null while inside <from> or <to>
@@ -52,43 +54,40 @@ public class TrafficParser {
         int eventType = xpp.getEventType();
         while (eventType != XmlPullParser.END_DOCUMENT) {
 
+            // Responds only to tags needed so new fields in the feed can't cause a crash
             if (eventType == XmlPullParser.START_TAG) {
                 String tag = xpp.getName();
 
                 if (tag.equalsIgnoreCase("situationRecord")) {
-                    current = new Situation(roadworksFeed);
+                    current = new Situation(roadworksFeed); // Creates situation and reads attributes
                     current.setId(xpp.getAttributeValue(null, "id"));
                     current.setRecordType(xpp.getAttributeValue(XSI_NAMESPACE, "type"));
                 }
+
+                // Nothing is stored outside the situationRecord
                 else if (current == null) {
-                }
-                else if (tag.equalsIgnoreCase("situationRecordCreationTime")) {
+                } else if (tag.equalsIgnoreCase("situationRecordCreationTime")) {
                     current.setCreationTime(parseTime(xpp.nextText()));
-                }
-                else if (tag.equalsIgnoreCase("situationRecordVersionTime")) {
+                } else if (tag.equalsIgnoreCase("situationRecordVersionTime")) {
                     current.setVersionTime(parseTime(xpp.nextText()));
-                }
-                else if (tag.equalsIgnoreCase("probabilityOfOccurrence")) {
+                } else if (tag.equalsIgnoreCase("probabilityOfOccurrence")) {
                     current.setProbability(xpp.nextText().trim());
-                }
-                else if (tag.equalsIgnoreCase("overallStartTime")) {
+                } else if (tag.equalsIgnoreCase("overallStartTime")) {
                     current.setStartTime(parseTime(xpp.nextText()));
-                }
-                else if (tag.equalsIgnoreCase("overallEndTime")) {
+                } else if (tag.equalsIgnoreCase("overallEndTime")) {
                     current.setEndTime(parseTime(xpp.nextText()));
-                }
-                else if (tag.equalsIgnoreCase("numberOfOperationalLanes")) {
+                } else if (tag.equalsIgnoreCase("numberOfOperationalLanes")) {
                     current.setOperationalLanes(parseInteger(xpp.nextText()));
-                }
-                else if (tag.equalsIgnoreCase("numberOfLanesRestricted")) {
+                } else if (tag.equalsIgnoreCase("numberOfLanesRestricted")) {
                     current.setRestrictedLanes(parseInteger(xpp.nextText()));
-                }
-                else if (tag.equalsIgnoreCase("delaysType")) {
+                } else if (tag.equalsIgnoreCase("delaysType")) {
                     current.setDelaysType(xpp.nextText().trim());
-                }
-                else if (tag.equalsIgnoreCase("generalPublicComment")) {
+                } else if (tag.equalsIgnoreCase("generalPublicComment")) {
                     inComment = true;
                 }
+
+                // <value> holds the description inside generalPublicComment,
+                // or a location name inside from/to
                 else if (tag.equalsIgnoreCase("value")) {
                     String text = xpp.nextText().trim();
                     if (inComment) {
@@ -96,63 +95,50 @@ public class TrafficParser {
                     } else if (currentPoint != null) {
                         lastDescriptorValue = text;
                     }
-                }
-                else if (tag.equalsIgnoreCase("tpegDirection")) {
+                } else if (tag.equalsIgnoreCase("tpegDirection")) {
                     current.setDirection(xpp.nextText().trim());
-                }
-                else if (tag.equalsIgnoreCase("from") || tag.equalsIgnoreCase("to")) {
+                } else if (tag.equalsIgnoreCase("from") || tag.equalsIgnoreCase("to")) {
                     currentPoint = new GeoPoint();
-                }
-                else if (tag.equalsIgnoreCase("latitude") && currentPoint != null) {
+                } else if (tag.equalsIgnoreCase("latitude") && currentPoint != null) {
                     currentPoint.setLatitude(parseDouble(xpp.nextText()));
-                }
-                else if (tag.equalsIgnoreCase("longitude") && currentPoint != null) {
+                } else if (tag.equalsIgnoreCase("longitude") && currentPoint != null) {
                     currentPoint.setLongitude(parseDouble(xpp.nextText()));
-                }
-                else if (tag.equalsIgnoreCase("tpegIlcPointDescriptorType")) {
+                } else if (tag.equalsIgnoreCase("tpegIlcPointDescriptorType")) {
                     String type = xpp.nextText().trim();
                     if (type.equals("tpegIlcName1") && current.getRoadName() == null) {
                         current.setRoadName(lastDescriptorValue);
                     }
-                }
-                else if (tag.equalsIgnoreCase("tpegOtherPointDescriptorType")) {
+                } else if (tag.equalsIgnoreCase("tpegOtherPointDescriptorType")) {
                     String type = xpp.nextText().trim();
                     if (type.equals("linkName")) {
                         if (current.getRoadName() == null) current.setRoadName(lastDescriptorValue);
                     } else if (currentPoint != null) {
                         currentPoint.setPlaceName(lastDescriptorValue);
                     }
-                }
-                else if (tag.equalsIgnoreCase("tpegJunctionPointDescriptorType")) {
+                } else if (tag.equalsIgnoreCase("tpegJunctionPointDescriptorType")) {
                     String type = xpp.nextText().trim();
                     if (type.equals("junctionName") && currentPoint != null) {
                         currentPoint.setJunction(lastDescriptorValue);
                     }
-                }
-                else if (tag.equalsIgnoreCase("roadOrCarriagewayOrLaneManagementType")
+                } else if (tag.equalsIgnoreCase("roadOrCarriagewayOrLaneManagementType")
                         || tag.equalsIgnoreCase("abnormalTrafficType")
                         || tag.equalsIgnoreCase("roadMaintenanceType")) {
                     current.setSubType(xpp.nextText().trim());
-                }
-                else if (tag.equalsIgnoreCase("urgentRoadworks")) {
+                } else if (tag.equalsIgnoreCase("urgentRoadworks")) {
                     current.setUrgent(xpp.nextText().trim().equalsIgnoreCase("true"));
                 }
-            }
-            else if (eventType == XmlPullParser.END_TAG && current != null) {
+            } else if (eventType == XmlPullParser.END_TAG && current != null) {
                 String tag = xpp.getName();
 
                 if (tag.equalsIgnoreCase("generalPublicComment")) {
                     inComment = false;
-                }
-                else if (tag.equalsIgnoreCase("from")) {
+                } else if (tag.equalsIgnoreCase("from")) {
                     current.setFrom(currentPoint);
                     currentPoint = null;
-                }
-                else if (tag.equalsIgnoreCase("to")) {
+                } else if (tag.equalsIgnoreCase("to")) {
                     current.setTo(currentPoint);
                     currentPoint = null;
-                }
-                else if (tag.equalsIgnoreCase("situationRecord")) {
+                } else if (tag.equalsIgnoreCase("situationRecord")) {
                     current.finishParsing();
                     situations.add(current);
                     current = null;
@@ -166,6 +152,8 @@ public class TrafficParser {
         return situations;
     }
 
+    // Convert text to typed values. A bad value is logged and stored as unknown (null / NaN)
+    // for that field only, instead of an exception losing the whole feed
     private static OffsetDateTime parseTime(String text) {
         try {
             return OffsetDateTime.parse(text.trim());

@@ -14,4 +14,22 @@
     <string name="menu_roadworks_2">Roadworks file 2</string>
     <string name="no_situations">No situations to show</string>
     <string name="attribution">Contains Traffic Scotland data</string>
+    <string name="select_situation">Select a situation from the list to see its details</string>
+    <string name="detail_impact">Impact</string>
+    <string name="detail_when">When</string>
+    <string name="detail_location">Location</string>
+    <string name="detail_record">Record details</string>
+    <string name="icon_key">Icon key</string>
+    <string name="icon_credit">Icons: Google Material Icons (fonts.google.com/icons), Apache License 2.0</string>
+    <string name="search_road_hint">Search by road (e.g. M8)</string>
+    <string name="showing_count">Showing %1$d</string>
+    <string name="distance_off">Near a place…</string>
+    <string name="distance_on">Within %1$d km of %2$s</string>
+    <string name="distance_title">Search by distance</string>
+    <string name="distance_from">Show situations near:</string>
+    <string name="distance_label">Within %1$d km</string>
+    <string name="apply">Apply</string>
+    <string name="clear">Clear</string>
+    <string name="map_info">%1$d situations shown - uses the list\'s search and filters</string>
+    <string name="show_on_map">Show on map</string>
 </resources>

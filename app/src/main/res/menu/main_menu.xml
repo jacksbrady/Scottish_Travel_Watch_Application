@@ -10,6 +10,10 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/action_key"
+        android:title="@string/icon_key" />
+
+    <item
         android:id="@+id/action_test_data"
         android:title="@string/test_data">
         <menu>

@@ -22,35 +22,35 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
+import com.example.brady_jack_s2327712.BuildConfig;
+
 /**
  * Traffic Repository reads the data from either the example files or the
- * live data stream and passes it to TrafficParser to be parest into the model
- *
+ * live data stream and passes it to TrafficParser to be paresd into the model
+ * <p>
  * Each successful download is saved to app storage so the previous data
  * can be used if the next download fails
- *
- * load() is blocking therefor needing called by a worker thread
+ * <p>
+ * load() is blocking therefore must be called from a worker thread
  */
 public class TrafficRepository {
 
     private static final String TAG = "TrafficRepository";
 
-    public static final boolean USE_EXAMPLE_DATA = true;
+    // false = download the live feeds, true = use the example XML files in res/raw
+    public static final boolean USE_EXAMPLE_DATA = false;
 
     private static final String UNPLANNED_URL =
             "https://datex2.trafficscotland.org/rest/2.3/publications/UnplannedEvents/Content.xml";
     private static final String ROADWORKS_URL =
             "https://datex2.trafficscotland.org/rest/2.3/publications/CurrentRoadworks/Content.xml";
 
-
+    // Dile names of saved copies of last good data in app's private storage if connection to live data is lost
     private static final String UNPLANNED_CACHE = "unplanned_cache.xml";
     private static final String ROADWORKS_CACHE = "roadworks_cache.xml";
-
-    // Traffic Scotland API credentials left empty until access is approved
-    // at which point they will be read in from local.properties
-    private static final String CLIENT_ID = "";
-    private static final String CLIENT_KEY = "";
-
+    // Reads from local.properties on build so never written in java file
+    private static final String CLIENT_ID = BuildConfig.TS_CLIENT_ID;
+    private static final String CLIENT_KEY = BuildConfig.TS_CLIENT_KEY;
     private final Context context;
     private final TrafficParser parser = new TrafficParser();
 
@@ -58,20 +58,25 @@ public class TrafficRepository {
         this.context = context.getApplicationContext();
     }
 
+    // A load produces three things (situations, where they came from, offline or not),
+    // but a method can only return one, so they are bundled together here
     public static class LoadResult {
         private final List<Situation> situations;
         private final String sourceDescription;
-        private final boolean offline;
 
-        LoadResult(List<Situation> situations, String sourceDescription, boolean offline) {
+
+        LoadResult(List<Situation> situations, String sourceDescription) {
             this.situations = situations;
             this.sourceDescription = sourceDescription;
-            this.offline = offline;
         }
 
-        public List<Situation> getSituations() { return situations; }
-        public String getSourceDescription() { return sourceDescription; }
-        public boolean isOffline() { return offline; }
+        public List<Situation> getSituations() {
+            return situations;
+        }
+
+        public String getSourceDescription() {
+            return sourceDescription;
+        }
     }
 
 
@@ -81,16 +86,17 @@ public class TrafficRepository {
             List<Situation> all = parseBoth(
                     readRaw(R.raw.unplanned_example_2),
                     readRaw(R.raw.roadworks_example_2));
-            return new LoadResult(all, "Example data", false);
+            return new LoadResult(all, "Example data");
         }
 
+        // Parse before saving so a bad download doesn't replace last good copy
         try {
             String unplannedXml = download(UNPLANNED_URL);
             String roadworksXml = download(ROADWORKS_URL);
             List<Situation> all = parseBoth(unplannedXml, roadworksXml);
             writeFile(UNPLANNED_CACHE, unplannedXml);
             writeFile(ROADWORKS_CACHE, roadworksXml);
-            return new LoadResult(all, "Live data, updated " + now(), false);
+            return new LoadResult(all, "Live data, updated " + now());
 
         } catch (Exception liveError) {
             Log.w(TAG, "Live download failed, trying saved copy: " + liveError);
@@ -101,13 +107,14 @@ public class TrafficRepository {
             List<Situation> all = parseBoth(readFile(UNPLANNED_CACHE), readFile(ROADWORKS_CACHE));
             String savedAt = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
                     .format(new Date(savedFile.lastModified()));
-            return new LoadResult(all, "Offline - showing data saved " + savedAt, true);
+            return new LoadResult(all, "Offline - showing data saved " + savedAt);
         }
     }
 
+    // Parsing one example file on its own used for testing
     public LoadResult loadExampleFile(int resId, boolean roadworksFeed, String fileName) throws Exception {
         List<Situation> list = parser.parse(readRaw(resId), roadworksFeed);
-        return new LoadResult(list, fileName, false);
+        return new LoadResult(list, fileName);
     }
 
     private List<Situation> parseBoth(String unplannedXml, String roadworksXml) throws Exception {
@@ -118,6 +125,9 @@ public class TrafficRepository {
     }
 
     private String download(String address) throws IOException {
+        if (CLIENT_ID.isEmpty() || CLIENT_KEY.isEmpty()) {
+            throw new IOException("No Traffic Scotland credentials in local.properties");
+        }
         HttpURLConnection connection =
                 (HttpURLConnection) URI.create(address).toURL().openConnection();
         connection.setConnectTimeout(15000);   // give up after 15 s instead of hanging
@@ -140,6 +150,8 @@ public class TrafficRepository {
         return readStream(context.getResources().openRawResource(resId));
     }
 
+    // Saved copies stored in getFilesDir()
+    // app-private storage so no permission required
     private String readFile(String name) throws IOException {
         return readStream(new FileInputStream(new File(context.getFilesDir(), name)));
     }
@@ -150,6 +162,7 @@ public class TrafficRepository {
         }
     }
 
+    // Reads any stream into a String
     private static String readStream(InputStream stream) throws IOException {
         StringBuilder sb = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="reference_places">
+        <item>Glasgow (GCU)</item>
+        <item>Edinburgh</item>
+        <item>Dundee</item>
+        <item>Aberdeen</item>
+        <item>Inverness</item>
+        <item>Stirling</item>
+        <item>My location</item>
+    </string-array>
+</resources>

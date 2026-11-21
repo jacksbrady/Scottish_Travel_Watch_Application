@@ -2,17 +2,19 @@ package com.example.brady_jack_s2327712.model;
 
 import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
+
 import com.example.brady_jack_s2327712.R;
 
 /**
- * Categories the nature of situation with clear text identifiers for
- * easy reusability (still to get colour and icon indicators)
+ * Categories the nature of situation with clear text, colour and icon identifiers for
+ * easy reusability
  * ----
  * AI proposed an enum instead of alternatives for its
  * protection against invalid inputs only accepting specified values
  * after prompted to check an int constants system for robustness
  */
 public enum SituationCategory {
+    // Each line creates an object with the four identifying features
     ROAD_CLOSED("Road closed", false, R.drawable.ic_road_closed, R.color.cat_road_closed),
     QUEUING_TRAFFIC("Queuing traffic", false, R.drawable.ic_traffic, R.color.cat_queuing),
     LANE_RESTRICTION("Lane restriction", false, R.drawable.ic_lane_restriction, R.color.cat_lane_restriction),
@@ -25,8 +27,10 @@ public enum SituationCategory {
 
     private final String label;
     private final boolean roadworks;
-    @DrawableRes private final int iconRes;
-    @ColorRes private final int colourRes;
+    @DrawableRes
+    private final int iconRes;
+    @ColorRes
+    private final int colourRes;
 
     SituationCategory(String label, boolean roadworks, @DrawableRes int iconRes, @ColorRes int colourRes) {
         this.label = label;
@@ -35,8 +39,19 @@ public enum SituationCategory {
         this.colourRes = colourRes;
     }
 
-    public String getLabel() { return label; }
-    public boolean isRoadworks() { return roadworks; }
-    public int getIconRes() { return iconRes; }
-    public int getColourRes() { return colourRes; }
+    public String getLabel() {
+        return label;
     }
+
+    public boolean isRoadworks() {
+        return roadworks;
+    }
+
+    public int getIconRes() {
+        return iconRes;
+    }
+
+    public int getColourRes() {
+        return colourRes;
+    }
+}

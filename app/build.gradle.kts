@@ -1,11 +1,23 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
+}
+
+// Reaeds private keys from local.properties
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
 }
 
 android {
     namespace = "com.example.brady_jack_s2327712"
     compileSdk {
         version = release(37)
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     defaultConfig {
@@ -16,6 +28,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["MAPS_API_KEY"] = localProperties.getProperty("MAPS_API_KEY", "")
+        buildConfigField("String", "TS_CLIENT_ID", "\"${localProperties.getProperty("TS_CLIENT_ID", "")}\"")
+        buildConfigField("String", "TS_CLIENT_KEY", "\"${localProperties.getProperty("TS_CLIENT_KEY", "")}\"")
     }
 
     buildTypes {
@@ -42,4 +57,5 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.lifecycle.livedata)
+    implementation(libs.play.services.maps)
 }
