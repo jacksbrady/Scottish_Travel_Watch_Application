@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import com.example.brady_jack_s2327712.BuildConfig;
 
@@ -105,7 +106,7 @@ public class TrafficRepository {
                 throw new IOException("No internet connection and no saved data yet");
             }
             List<Situation> all = parseBoth(readFile(UNPLANNED_CACHE), readFile(ROADWORKS_CACHE));
-            String savedAt = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+            String savedAt = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.UK)
                     .format(new Date(savedFile.lastModified()));
             return new LoadResult(all, "Offline - showing data saved " + savedAt);
         }
@@ -176,6 +177,6 @@ public class TrafficRepository {
     }
 
     private static String now() {
-        return DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date());
+        return DateFormat.getTimeInstance(DateFormat.SHORT, Locale.UK).format(new Date());
     }
 }
